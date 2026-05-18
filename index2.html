@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>不等式冒險島 - 旗艦教育版</title>
+    <title>不等式冒險島 - 測試版</title>
     <style>
         :root {
             --primary: #4a90e2; --secondary: #67c23a; --danger: #f56c6c;
@@ -11,6 +11,9 @@
         }
         * { box-sizing: border-box; font-family: "Microsoft JhengHei", "Heiti TC", sans-serif; }
         body { background: #f0f2f5; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+
+        /* --- 隱藏元素的終極武器 --- */
+        .hidden { display: none !important; }
 
         /* --- 大廳樣式 --- */
         #view-lobby { width: 100%; max-width: 1200px; padding: 40px 10px; text-align: center; }
@@ -30,9 +33,9 @@
         .card-list { text-align: left; list-style: none; padding: 0; font-size: 0.85rem; color: #444; flex-grow: 1; }
         .card-list li { margin-bottom: 10px; display: flex; align-items: flex-start; gap: 6px; }
 
-        /* --- 通用 UI --- */
-        .view-content { display: none; width: 95%; max-width: 650px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-top: 40px; margin-bottom: 40px; }
-        .active { display: block; }
+        /* --- 遊戲/診斷 UI 容器 --- */
+        .view-content { width: 95%; max-width: 650px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-top: 40px; margin-bottom: 40px; }
+        
         .back-btn { padding: 8px 16px; background: var(--dark); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.9rem; box-shadow: 0 3px 0 #1a252f; margin-bottom: 15px; }
         .back-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #1a252f; }
         
@@ -65,15 +68,18 @@
         .fraction { display: inline-block; vertical-align: middle; text-align: center; margin: 0 8px; }
         .fraction > span { display: block; padding: 0 10px; }
         .fraction span.fdn { border-top: 2px solid var(--dark); }
-        .hidden { display: none; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 15px; }
-        th, td { border: 1px solid #ddd; padding: 10px; }
-        .advice-box { background: #f4faff; border-left: 5px solid var(--primary); padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; }
+        
+        /* 報告表格與建議框樣式 */
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background-color: #f4f7f9; }
+        .advice-box { background: #f4faff; border-left: 5px solid var(--primary); padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; line-height: 1.6; }
+        .failure-box { background: #fff5f5; border-left: 5px solid var(--danger); padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; line-height: 1.6; }
     </style>
 </head>
 <body>
 
-<div id="view-lobby" class="active">
+<div id="view-lobby">
     <h1 class="lobby-title">📐 不等式學習冒險島</h1>
     <div class="card-container">
         <div class="card card-diag" onclick="openGame('diag')">
@@ -115,7 +121,7 @@
     </div>
 </div>
 
-<div id="view-game" class="view-content">
+<div id="view-game" class="view-content hidden">
     <button class="back-btn" onclick="goHome()">← 返回大廳</button>
     
     <div id="diag-module" class="hidden">
@@ -172,7 +178,6 @@
         chal: { range: 6, window: [], isWaitingNext: false }
     };
 
-    // 定義關卡的上下階關係
     const levelMap = {
         'base': { next: 'adv', prev: 'lobby', nextName: '進階關', prevName: '大廳' },
         'adv':  { next: 'chal', prev: 'base', nextName: '挑戰關', prevName: '基礎關' },
@@ -191,10 +196,11 @@
         return val;
     }
 
-    // --- 導航 ---
+    // --- 導航控制 (已修復：確保大廳完全隱藏) ---
     function openGame(mode) {
-        document.getElementById('view-lobby').classList.remove('active');
-        document.getElementById('view-game').classList.add('active');
+        document.getElementById('view-lobby').classList.add('hidden'); // 隱藏大廳
+        document.getElementById('view-game').classList.remove('hidden'); // 顯示遊戲區
+        
         document.getElementById('diag-module').classList.add('hidden');
         document.getElementById('practice-module').classList.add('hidden');
 
@@ -209,8 +215,8 @@
     }
 
     function goHome() {
-        document.getElementById('view-game').classList.remove('active');
-        document.getElementById('view-lobby').classList.add('active');
+        document.getElementById('view-game').classList.add('hidden'); // 隱藏遊戲區
+        document.getElementById('view-lobby').classList.remove('hidden'); // 顯示大廳
         document.getElementById('transition-modal').classList.add('hidden');
     }
 
@@ -311,7 +317,6 @@
         toggleInputs('practice', true);
         toggleButtonToNext(btn, true);
 
-        // --- 雙向精熟與降級判定 ---
         if (isOk && okCount >= 3) {
             setTimeout(() => showTransitionPopup(mode, 'upgrade'), 800);
             pState[mode].window = []; 
@@ -346,8 +351,6 @@
         } else {
             icon.innerText = "📉";
             title.innerText = "遇到瓶頸了嗎？";
-            
-            // 🔥修復點：針對基礎關的專屬降級文案調整
             if (mapInfo.prev === 'lobby') {
                 text.innerText = "看來這關目前有點挑戰，要不要先回到遊戲中遊玩放鬆暖身一下？";
                 actionBtn.innerText = "回到遊戲遊玩";
@@ -355,7 +358,6 @@
                 text.innerText = `看來這關目前有點挑戰，要不要先退回「${mapInfo.prevName}」暖身一下？`;
                 actionBtn.innerText = `退回${mapInfo.prevName}`;
             }
-            
             actionBtn.style.background = "var(--warning)";
             actionBtn.onclick = () => { modal.classList.add('hidden'); if(mapInfo.prev==='lobby') goHome(); else openGame(mapInfo.prev); };
         }
@@ -383,6 +385,7 @@
         document.getElementById('diag-quiz').classList.add('hidden');
         document.getElementById('diag-report').classList.add('hidden');
     }
+    
     function startDiag(lvl) {
         diagState.lvl = lvl; diagState.isWaitingNext = false;
         document.getElementById('diag-setup').classList.add('hidden');
@@ -391,6 +394,7 @@
         toggleButtonToNext(document.getElementById('diag-btn'), false);
         nextDiagProb();
     }
+    
     function nextDiagProb() {
         const lvl = diagState.lvl; const ops = ['>', '<', '≥', '≤']; const flip = {'>':'<', '<':'>', '≥':'≤', '≤':'≥'};
         let prob = {};
@@ -413,28 +417,80 @@
         document.getElementById('diag-val').value = '';
         renderDiagDots();
     }
+    
     function submitDiag() {
-        const btn = document.getElementById('diag-btn'); const msg = document.getElementById('diag-trans-msg');
+        const btn = document.getElementById('diag-btn'); 
+        const msg = document.getElementById('diag-trans-msg');
+        
         if (diagState.isWaitingNext) {
-            diagState.isWaitingNext = false; msg.classList.add('hidden'); toggleInputs('diag', false); toggleButtonToNext(btn, false);
+            diagState.isWaitingNext = false; 
+            msg.classList.add('hidden'); 
+            toggleInputs('diag', false); 
+            toggleButtonToNext(btn, false);
+            
             const okC = diagState.window.filter(x=>x).length;
+            const errC = diagState.window.filter(x=>!x).length; 
+            
             if (okC >= 3) {
                 diagState.passed.add(diagState.lvl);
-                if (diagState.lvl === 3) finishDiag();
-                else { diagState.lvl++; diagState.window = []; nextDiagProb(); }
-            } else if (diagState.window.length - okC >= 3) { finishDiag(); } else { nextDiagProb(); }
+                if (diagState.lvl === 3) {
+                    finishDiag(); 
+                } else { 
+                    if (diagState.failed.has(diagState.lvl + 1)) {
+                        finishDiag(); 
+                    } else {
+                        diagState.lvl++; 
+                        diagState.window = []; 
+                        alert(`🌟 表現優異！系統將為您提升至第 ${diagState.lvl} 層次繼續挑戰！`);
+                        nextDiagProb(); 
+                    }
+                }
+            } 
+            else if (errC >= 3) { 
+                diagState.failed.add(diagState.lvl);
+                if (diagState.lvl === 1) {
+                    finishDiag(); 
+                } else {
+                    if (diagState.passed.has(diagState.lvl - 1)) {
+                        finishDiag(); 
+                    } else {
+                        diagState.lvl--; 
+                        diagState.window = []; 
+                        alert(`📉 遇到一點小挑戰！系統為您動態調整至第 ${diagState.lvl} 層次。`);
+                        nextDiagProb(); 
+                    }
+                }
+            } 
+            else { 
+                nextDiagProb(); 
+            }
             return;
         }
+        
         const uOp = document.getElementById('diag-op').value; const uVal = parseInt(document.getElementById('diag-val').value);
         if (isNaN(uVal)) return;
         const isOk = (uOp === diagState.prob.solOp && uVal === diagState.prob.solX);
-        diagState.history.push({ lvl: diagState.lvl, q: diagState.prob.eq, ua: `x ${uOp} ${uVal}`, ca: `x ${diagState.prob.solOp} ${diagState.prob.solX}`, correct: isOk });
+        
+        diagState.history.push({ 
+            lvl: diagState.lvl, 
+            q: diagState.prob.eq, 
+            ua: `x ${uOp} ${uVal}`, 
+            ca: `x ${diagState.prob.solOp} ${diagState.prob.solX}`, 
+            correct: isOk 
+        });
+        
         diagState.window.push(isOk); if (diagState.window.length > 4) diagState.window.shift();
         renderDiagDots();
+        
         msg.innerText = isOk ? "✅ 答對了！" : `❌ 正確答案：x ${diagState.prob.solOp} ${diagState.prob.solX}`;
-        msg.className = `msg-box ${isOk ? 'correct-bg' : 'wrong-bg'}`; msg.classList.remove('hidden');
-        diagState.isWaitingNext = true; toggleInputs('diag', true); toggleButtonToNext(btn, true);
+        msg.className = `msg-box ${isOk ? 'correct-bg' : 'wrong-bg'}`; 
+        msg.classList.remove('hidden');
+        
+        diagState.isWaitingNext = true; 
+        toggleInputs('diag', true); 
+        toggleButtonToNext(btn, true);
     }
+    
     function renderDiagDots() {
         const c = document.getElementById('diag-dots'); c.innerHTML = '';
         for (let i = 0; i < 4; i++) {
@@ -442,11 +498,47 @@
             c.appendChild(d);
         }
     }
+    
     function finishDiag() {
         document.getElementById('diag-quiz').classList.add('hidden');
-        const r = document.getElementById('diag-report'); r.classList.remove('hidden');
-        let badge = diagState.passed.has(3) ? "挑戰大師" : (diagState.passed.has(2) ? "推理高手" : "新星學徒");
-        r.innerHTML = `<div style="background:#f4f7f9; padding:20px; border-radius:12px; margin-bottom:20px;"><strong>評定等級：</strong><br><span style="font-size:1.6rem; color:var(--primary); font-weight:bold;">${badge}</span></div><div class="advice-box"><strong>建議：</strong>可前往對應關卡進行無限練習！</div><button onclick="goHome()" class="lvl-btn" style="background:var(--primary)">回到大廳</button>`;
+        const r = document.getElementById('diag-report'); 
+        r.classList.remove('hidden');
+        
+        let badge = "初探新手";
+        let advice = "建議先回遊戲/基礎關/先備知識關練習";
+        let isErr = true;
+
+        if (diagState.passed.has(3)) { 
+            badge = "挑戰大師"; 
+            advice = "建議前往下一單元<br><small>(例如：下一單元基礎概念)</small>"; 
+            isErr = false; 
+        } else if (diagState.passed.has(2)) { 
+            badge = "推理高手"; 
+            advice = "建議前往習作/挑戰關卡<br><small>(例如：綜合應用題)</small>"; 
+            isErr = false; 
+        } else if (diagState.passed.has(1)) { 
+            badge = "新星學徒"; 
+            advice = "建議前往課本/進階關卡<br><small>(例如：課本指定例題)</small>"; 
+            isErr = false; 
+        }
+
+        r.innerHTML = `
+            <div style="background:#f4f7f9; padding:20px; border-radius:12px; margin-bottom:20px;">
+                <strong>1. 評定等級：</strong><br>
+                <span style="font-size:1.6rem; color:var(--primary); font-weight:bold;">${badge}</span>
+            </div>
+            <div style="margin-bottom:20px;">
+                <strong>2. 作答紀錄：</strong>
+                <table>
+                    <tr><th>題目</th><th>你的答案</th><th>正確答案</th></tr>
+                    ${diagState.history.map(h => `<tr><td><div style="font-size:0.8rem">${h.q}</div></td><td style="color:${h.correct?'#2e7d32':'#c62828'}; font-weight:bold;">${h.ua}</td><td>${h.ca}</td></tr>`).join('')}
+                </table>
+            </div>
+            <div class="${isErr ? 'failure-box' : 'advice-box'}">
+                <strong>3. 學習建議：</strong><br><br>${advice}
+            </div>
+            <button onclick="goHome()" class="lvl-btn" style="background:var(--primary)">回到大廳</button>
+        `;
     }
 </script>
 </body>
