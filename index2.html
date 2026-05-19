@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>不等式冒險島 - 測試版</title>
+    <title>不等式冒險島 - 旗艦教育版</title>
     <style>
         :root {
             --primary: #4a90e2; --secondary: #67c23a; --danger: #f56c6c;
@@ -17,7 +17,24 @@
 
         /* --- 大廳樣式 --- */
         #view-lobby { width: 100%; max-width: 1200px; padding: 40px 10px; text-align: center; }
-        .lobby-title { color: var(--dark); margin-bottom: 40px; font-size: 2.2rem; font-weight: bold; }
+        
+        /* --- 大廳標題與提示框樣式 --- */
+        .lobby-header { margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; }
+        .lobby-title { color: #0a1b44; margin: 0 0 15px 0; font-size: 2.8rem; font-weight: bold; letter-spacing: 2px; }
+        .lobby-subtitle { color: #222; font-size: 1.1rem; margin: 0 0 15px 0; font-weight: 600; letter-spacing: 1px; }
+        .lobby-tip {
+            background: #fffdf5; 
+            border: 2px solid #f6d89b; 
+            border-radius: 30px; 
+            padding: 10px 25px; 
+            font-size: 1.05rem; 
+            color: #333; 
+            font-weight: bold;
+            display: inline-block;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .highlight-red { color: #e5534b; }
+
         .card-container { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; padding-bottom: 20px; }
         .card {
             background: white; border-radius: 20px; padding: 20px; width: 260px; min-width: 240px;
@@ -38,6 +55,31 @@
         
         .back-btn { padding: 8px 16px; background: var(--dark); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.9rem; box-shadow: 0 3px 0 #1a252f; margin-bottom: 15px; }
         .back-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #1a252f; }
+        
+        /* --- 適性診斷選擇頁面專用樣式 --- */
+        .diag-choice-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+        .diag-lvl-card {
+            flex: 1;
+            padding: 30px 10px;
+            border: none;
+            border-radius: 15px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 150px;
+        }
+        .diag-lvl-card:hover { transform: translateY(-5px); filter: brightness(1.05); }
+        .diag-lvl-card h3 { margin: 0 0 8px 0; font-size: 1.2rem; font-weight: bold; }
+        .diag-lvl-card p { margin: 0; font-size: 1rem; opacity: 0.95; }
         
         .lvl-btn { width: 100%; margin-bottom: 12px; padding: 16px; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; }
         .lvl-btn:active { transform: translateY(3px); }
@@ -80,7 +122,13 @@
 <body>
 
 <div id="view-lobby">
-    <h1 class="lobby-title">📐 不等式學習冒險島</h1>
+    <div class="lobby-header">
+        <h1 class="lobby-title">不等式學習冒險島</h1>
+        <p class="lobby-subtitle">本遊戲設有適性診斷、基礎、進階與挑戰等四個關卡，你可以自由挑選任一關。</p>
+        <div class="lobby-tip">
+            💡 如果你想了解自己目前的學習狀態與適合的學習方向，建議先進行<span class="highlight-red">「適性診斷」</span>哦！
+        </div>
+    </div>
     <div class="card-container">
         <div class="card card-diag" onclick="openGame('diag')">
             <div class="card-icon">🔍</div>
@@ -126,10 +174,23 @@
     
     <div id="diag-module" class="hidden">
         <div id="diag-setup">
-            <h2 style="text-align: center;">🎯 歡迎進入適性診斷！</h2>
-            <button class="lvl-btn" onclick="startDiag(1)" style="background: var(--secondary); box-shadow: 0 4px 0 #529b2e;">從 第 1 層次 開始 (基礎)</button>
-            <button class="lvl-btn" onclick="startDiag(2)" style="background: var(--primary); box-shadow: 0 4px 0 #357abd;">從 第 2 層次 開始 (進階)</button>
-            <button class="lvl-btn" onclick="startDiag(3)" style="background: var(--danger); box-shadow: 0 4px 0 #c45656;">從 第 3 層次 開始 (挑戰)</button>
+            <h2 style="text-align: center; margin-bottom: 10px;">🎯 歡迎進入適性診斷！</h2>
+            <p style="text-align: center; color: #555; font-weight: bold; margin-bottom: 20px;">此診斷有三個層次，你可以自由挑選任一層次</p>
+            
+            <div class="diag-choice-container">
+                <button class="diag-lvl-card" onclick="startDiag(1)" style="background: var(--secondary); box-shadow: 0 4px 0 #529b2e;">
+                    <h3>從 第 1 層次</h3>
+                    <p>(基礎) 開始</p>
+                </button>
+                <button class="diag-lvl-card" onclick="startDiag(2)" style="background: var(--primary); box-shadow: 0 4px 0 #357abd;">
+                    <h3>從 第 2 層次</h3>
+                    <p>(進階) 開始</p>
+                </button>
+                <button class="diag-lvl-card" onclick="startDiag(3)" style="background: var(--danger); box-shadow: 0 4px 0 #c45656;">
+                    <h3>從 第 3 層次</h3>
+                    <p>(挑戰) 開始</p>
+                </button>
+            </div>
         </div>
         <div id="diag-quiz" class="hidden">
             <div id="diag-trans-msg" class="msg-box hidden"></div>
@@ -196,10 +257,10 @@
         return val;
     }
 
-    // --- 導航控制 (已修復：確保大廳完全隱藏) ---
+    // --- 導航控制 ---
     function openGame(mode) {
-        document.getElementById('view-lobby').classList.add('hidden'); // 隱藏大廳
-        document.getElementById('view-game').classList.remove('hidden'); // 顯示遊戲區
+        document.getElementById('view-lobby').classList.add('hidden');
+        document.getElementById('view-game').classList.remove('hidden');
         
         document.getElementById('diag-module').classList.add('hidden');
         document.getElementById('practice-module').classList.add('hidden');
@@ -215,8 +276,8 @@
     }
 
     function goHome() {
-        document.getElementById('view-game').classList.add('hidden'); // 隱藏遊戲區
-        document.getElementById('view-lobby').classList.remove('hidden'); // 顯示大廳
+        document.getElementById('view-game').classList.add('hidden');
+        document.getElementById('view-lobby').classList.remove('hidden');
         document.getElementById('transition-modal').classList.add('hidden');
     }
 
